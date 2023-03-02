@@ -25,23 +25,23 @@ public sealed class GameManager : NetworkBehaviour
         conStart = players.All(player => player.isReady);
     }
 
-    [Server]
-    public void StartGame()
-    {
-        if (!conStart) return;
+    //[Server]
+    //public void StartGame()
+    //{
+    //    if (!conStart) return;
 
-        for (int i = 0; i < players.Count; i++)
-        {
-            players[i].StartGame();
-        }
-    }
+    //    for (int i = 0; i < players.Count; i++)
+    //    {
+    //        players[i].StartGame();
+    //    }
+    //}
 
-    [Server]
-    public void StopGame()
-    {
-        for (int i = 0; i < players.Count; i++)
-        {
-            players[i].StopGame();
-        }
-    }
+    //[Server]
+    //public void StopGame()
+    //{
+    //    for (int i = 0; i < players.Count; i++)
+    //    {
+    //        players[i].StopGame();
+    //    }
+    //}
 }

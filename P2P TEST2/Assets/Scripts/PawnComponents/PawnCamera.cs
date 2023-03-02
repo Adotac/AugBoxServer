@@ -18,13 +18,21 @@ public sealed class PawnCamera : NetworkBehaviour
         input = GetComponent<PawnInput>();
     }
 
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+
+        myCam.GetComponent<Camera>().enabled = IsOwner;
+        myCam.GetComponent<AudioListener>().enabled = IsOwner;
+    }
+
     private void Update()
     {
         if (!IsOwner) return;
 
         _eulerAngles.x -= input._mouseY;
         _eulerAngles.x = Mathf.Clamp(_eulerAngles.x, xmin, xmax);
-        myCam.eulerAngles = _eulerAngles;
-        transform.Rotate(0.0f, input._mouseY, 0.0f, Space.World);
+        myCam.localEulerAngles = _eulerAngles;
+        transform.Rotate(0.0f, input._mouseX, 0.0f, Space.World);
     }
 }

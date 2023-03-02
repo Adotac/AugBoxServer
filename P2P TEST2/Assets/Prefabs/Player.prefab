@@ -81,4 +81,4 @@ MonoBehaviour:
   _networkObjectCache: {fileID: 3075363175642746849}
   uname: test
   isReady: 0
-  controlledPawn: {fileID: 6097977911272940641, guid: 44ec76cd3c18ab047847975549fc3bc2, type: 3}
+  controlledPawn: {fileID: 0}

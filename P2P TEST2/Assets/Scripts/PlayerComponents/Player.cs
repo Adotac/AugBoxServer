@@ -41,10 +41,20 @@ public sealed class Player : NetworkBehaviour
 
     private void Update()
     {
-        if (IsOwner) return; //check if this is the owner of the object in the client or host side
+        if (!IsOwner)
+        { //check if this is the owner of the object in the client or host side
+            Debug.Log($"IsOwner: {IsOwner}");
+            return;
+        } 
 
         if (Input.GetKeyDown(KeyCode.R)) {
             ServerSetIsReady(!isReady);
+            Debug.Log($"Ready: {isReady}"); 
+        }
+
+        if (Input.GetKeyDown(KeyCode.T)) {
+            ServerSpawnPawn();
+            Debug.Log("Should Spawn");
         }
 
     }
@@ -52,5 +62,16 @@ public sealed class Player : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]//this is a field that allows to execute the code on the serverside
     private void ServerSetIsReady(bool val) {
         isReady = val;   
+    }
+
+    [ServerRpc]
+
+    private void ServerSpawnPawn()
+    {
+        GameObject pawnPrefab = Addressables.LoadAssetAsync<GameObject>("Pawn").WaitForCompletion();
+
+        GameObject pawnInstance = Instantiate(pawnPrefab);
+
+        Spawn(pawnInstance, Owner); //assign the instance to the owner
     }
 }

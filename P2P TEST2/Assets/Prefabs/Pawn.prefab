@@ -100,6 +100,8 @@ GameObject:
   - component: {fileID: 9211657832624837758}
   - component: {fileID: 1920162445559281618}
   - component: {fileID: -8798652045523397982}
+  - component: {fileID: -1222280417213852630}
+  - component: {fileID: 2884163704065571680}
   m_Layer: 0
   m_Name: Pawn
   m_TagString: Untagged
@@ -142,6 +144,9 @@ MonoBehaviour:
   _networkBehaviours:
   - {fileID: 6097977911272940641}
   - {fileID: 808427222192473302}
+  - {fileID: 9211657832624837758}
+  - {fileID: 1920162445559281618}
+  - {fileID: -8798652045523397982}
   <ParentNetworkObject>k__BackingField: {fileID: 0}
   <ChildNetworkObjects>k__BackingField: []
   _isNetworked: 1
@@ -149,7 +154,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _defaultDespawnType: 0
   NetworkObserver: {fileID: 0}
-  <PrefabId>k__BackingField: 0
+  <PrefabId>k__BackingField: 4
   <SpawnableCollectionId>k__BackingField: 0
   _scenePathHash: 0
   <SceneId>k__BackingField: 0
@@ -172,7 +177,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 112140145669757999}
   _networkObjectCache: {fileID: 112140145669757999}
   controllingPlayer: {fileID: 0}
-  health: 0
+  health: 100
 --- !u!143 &7192257512914609643
 CharacterController:
   m_ObjectHideFlags: 0
@@ -224,14 +229,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40ec1041cee75b146b79290858e58714, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 2
   _addedNetworkObject: {fileID: 112140145669757999}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 112140145669757999}
   playerVelocity: {x: 0, y: 0, z: 0}
   groundedPlayer: 0
   playerSpeed: 15
   jumpHeight: 5
-  gravityValue: -9.81
+  gravityValue: 9.81
 --- !u!114 &1920162445559281618
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -244,9 +249,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d10dea5f72dccee49b562d3f2932a7a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 3
   _addedNetworkObject: {fileID: 112140145669757999}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 112140145669757999}
   myCam: {fileID: 2797803196184910432}
   xmin: -90
   xmax: 90
@@ -262,9 +267,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2836e36774ca1c4bbbee976e17b649c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _componentIndexCache: 255
+  _componentIndexCache: 4
   _addedNetworkObject: {fileID: 112140145669757999}
-  _networkObjectCache: {fileID: 0}
+  _networkObjectCache: {fileID: 112140145669757999}
   _synchronizeParent: 0
   _packing:
     Position: 1
@@ -291,6 +296,62 @@ MonoBehaviour:
     X: 0
     Y: 0
     Z: 0
+--- !u!64 &-1222280417213852630
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4846004065799930161}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 0}
+--- !u!23 &2884163704065571680
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4846004065799930161}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: d0a99caade0a68842b2274726d1bc7c3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &6407001804769570914
 GameObject:
   m_ObjectHideFlags: 0
@@ -353,7 +414,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: d0a99caade0a68842b2274726d1bc7c3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

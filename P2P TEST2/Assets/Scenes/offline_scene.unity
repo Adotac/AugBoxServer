@@ -798,6 +798,9 @@ GameObject:
   - component: {fileID: 1130396800}
   - component: {fileID: 1130396799}
   - component: {fileID: 1130396801}
+  - component: {fileID: 1130396803}
+  - component: {fileID: 1130396804}
+  - component: {fileID: 1130396802}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -871,6 +874,70 @@ MonoBehaviour:
   _offlineScene: Assets/Scenes/offline_scene.unity
   _onlineScene: Assets/Scenes/online_scene.unity
   _replaceScenes: 0
+--- !u!114 &1130396802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1130396797}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9da90c29836670c49809661c5c09cd5d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _steamAppID: 480
+  _serverBindAddress: 
+  _port: 27015
+  _maximumClients: 16
+  _clientAddress: 76561199483848980
+  _timeout: 25
+--- !u!114 &1130396803
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1130396797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34e4a322dca349547989b14021da4e23, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Transport: {fileID: 1130396804}
+  _intermediateLayer: {fileID: 0}
+  _latencySimulator:
+    _enabled: 0
+    _simulateHost: 0
+    _latency: 0
+    _outOfOrder: 0
+    _packetLoss: 0
+--- !u!114 &1130396804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1130396797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ebbe8323a048884fa60c88902c33cf2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maximumClients: 1521
+  socketName: FishyEOS
+  remoteServerProductUserId: 0002780586644887316944b9a41246b3
+  autoAuthenticate: 1
+  authConnectData:
+    loginCredentialType: 3
+    externalCredentialType: 10
+    id: 
+    token: 
+    displayName: FishyEOS
+    automaticallyCreateDeviceId: 1
+    automaticallyCreateConnectAccount: 1
+    authScopeFlags: 0
+    timeout: 30
 --- !u!1 &1237683761
 GameObject:
   m_ObjectHideFlags: 0

@@ -130,7 +130,7 @@ namespace FishNet.Transporting.FishyEOSPlugin
 
         // -----------------------------------
         /// <summary>
-        /// Gets the EOS Connect Peer Id of a remote connection Id.
+        /// Gets the EOS Connect Peer Id of a remote connection Id. 
         /// </summary>
         /// <param name="connectionId"></param>
         /// <returns></returns>

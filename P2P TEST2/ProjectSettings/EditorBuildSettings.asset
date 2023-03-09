@@ -11,5 +11,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/online_scene.unity
     guid: 087e9971e1d9a7140bc9e3c8e9569944
+  - enabled: 0
+    path: Assets/Samples/Epic Online Services Plugin for Unity/2.2.0/EOS Plugin for
+      Unity Samples/Scenes/Peer2Peer.unity
+    guid: f0e74d05ae7114d4ba6ea2d6fcd2be54
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: ed617053b0e32d74ea866c1cfc0eca50, type: 2}

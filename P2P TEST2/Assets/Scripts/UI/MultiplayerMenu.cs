@@ -10,6 +10,7 @@ public sealed class MultiplayerMenu : MonoBehaviour
     [SerializeField] private Button connectButton;
 
     private void Start() {
+#if !UNITY_SERVER
         hostButton.onClick.AddListener(() => {
             InstanceFinder.ServerManager.StartConnection();
 
@@ -20,5 +21,6 @@ public sealed class MultiplayerMenu : MonoBehaviour
         connectButton.onClick.AddListener(() => {
             InstanceFinder.ClientManager.StartConnection();
         });
+#endif
     }
 }

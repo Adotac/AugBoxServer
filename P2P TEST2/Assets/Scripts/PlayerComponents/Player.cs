@@ -39,6 +39,7 @@ public sealed class Player : NetworkBehaviour
         //UIManager.Instance.Show<LobbyView>();
     }
 
+    [Client]
     private void Update()
     {
         if (!IsOwner)

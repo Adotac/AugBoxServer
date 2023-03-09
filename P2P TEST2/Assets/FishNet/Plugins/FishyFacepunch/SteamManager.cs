@@ -74,25 +74,15 @@ public class SteamManager : MonoBehaviour
     private bool _ds = true;
     #endregion
 
-    //private void Awake()
-    //{
-    //    DontDestroyOnLoad(this);
-    //    try { 
-    //        SteamClient.Init
-    //    } catch { 
-        
-    //    }
-    //}
+
 
     void Start()
     {
-        Debug.Log($"UNITY_SERVER not yet!");
 #if UNITY_SERVER
         InstanceFinder.ServerManager.StartConnection();
         InstanceFinder.ServerManager.OnServerConnectionState += OnServerConnectionState;
-        Debug.Log("UNITY_SERVER on!"); 
 #endif
-    } 
+    }
 
     private void OnServerConnectionState(FishNet.Transporting.ServerConnectionStateArgs state)
     {
@@ -111,7 +101,7 @@ public class SteamManager : MonoBehaviour
 
             try
             {
-                SteamServer.Init(_steamAppID, serverInit, true);
+                SteamServer.Init(1280590, serverInit, true);
                 SteamServer.ServerName = _serverName;
                 SteamServer.MaxPlayers = InstanceFinder.TransportManager.Transport.GetMaximumClients();
                 SteamServer.Passworded = !string.IsNullOrEmpty(_password);
@@ -130,7 +120,6 @@ public class SteamManager : MonoBehaviour
                     Debug.LogWarning("Couldn't initialize server");
                     return;
                 }
-                Debug.Log($"Steam server is up and running...");
             }
             catch (Exception ex)
             {

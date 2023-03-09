@@ -38,6 +38,5 @@
   <assembly fullname="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
     <type fullname="UnityEngine.CapsuleCollider" preserve="all" />
     <type fullname="UnityEngine.CharacterController" preserve="all" />
-    <type fullname="UnityEngine.MeshCollider" preserve="all" />
   </assembly>
 </linker>

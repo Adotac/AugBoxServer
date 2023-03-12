@@ -820,10 +820,8 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
         {
             if (callbackInfo.ResultCode == Result.Success || callbackInfo.ResultCode == Result.DuplicateNotAllowed)
             {
-#if UNITY_STANDALONE_WIN
-                //TODO: find device appropriate display name for other platforms
                 string displayName = "Device User";
-#endif
+
                 StartConnectLoginWithToken(ExternalCredentialType.DeviceidAccessToken, null, displayName);
             }
             else
@@ -832,6 +830,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
                 ConfigureUIForLogin();
             }
         }
+
         private void ConnectDiscord()
         {
             var discordManager = Discord.DiscordManager.Instance;

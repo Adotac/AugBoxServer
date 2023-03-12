@@ -62,7 +62,7 @@ namespace PlayEveryWare.EpicOnlineServices.Samples
         public bool RTCRoomEnabled = false;
 
         public List<LobbyAttribute> Attributes = new List<LobbyAttribute>();
-        public List<LobbyMember> Members = new List<LobbyMember>(); 
+        public List<LobbyMember> Members = new List<LobbyMember>();
 
         // Utility data
 

@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using PlayEveryWare.EpicOnlineServices;
 
@@ -67,12 +66,14 @@ public class LoginMenu : MonoBehaviour
 
     private void Awake()
     {
+
+
         idInputField.InputField.onEndEdit.AddListener(CacheIdInputField);
         tokenInputField.InputField.onEndEdit.AddListener(CacheTokenField);
 #if UNITY_EDITOR
         loginType = LoginCredentialType.AccountPortal; // Default in editor
 #else
-            loginType = LoginCredentialType.AccountPortal; // Default on other platforms
+        loginType = LoginCredentialType.AccountPortal; // Default on other platforms
 #endif
         useConnectLogin = false;
 
@@ -117,7 +118,9 @@ public class LoginMenu : MonoBehaviour
                 break;
         }
 
+        Debug.Log($"Dropdown changed: {value}");
         ConfigureUIForLogin();
+        
     }
 
     public void Start()
@@ -139,6 +142,8 @@ public class LoginMenu : MonoBehaviour
 
     public void Update()
     {
+        // Debug.Log($"Host input state: {idInputField.isActiveAndEnabled}");
+
         // Prevent Deselection
         if (system.currentSelectedGameObject != null && system.currentSelectedGameObject != selectedGameObject)
         {
@@ -228,8 +233,11 @@ public class LoginMenu : MonoBehaviour
 
         idContainer.gameObject.SetActive(true);
         connectTypeContainer.gameObject.SetActive(false);
+
         idInputField.gameObject.SetActive(true);
         tokenInputField.gameObject.SetActive(true);
+        Debug.Log($"Host input state after select: {idInputField.isActiveAndEnabled}");
+
         idText.gameObject.SetActive(true);
         tokenText.gameObject.SetActive(true);
 
@@ -384,11 +392,6 @@ public class LoginMenu : MonoBehaviour
                 //ExternalCredentialType.AmazonAccessToken
             };
 
-#if UNITY_STANDALONE
-        credentialTypes.Add(ExternalCredentialType.SteamSessionTicket);
-        credentialTypes.Add(ExternalCredentialType.SteamAppTicket);
-
-#endif
 
         foreach (var type in credentialTypes)
         {
@@ -442,6 +445,7 @@ public class LoginMenu : MonoBehaviour
         // Controller
         //EventSystem.current.SetSelectedGameObject(null);
         EventSystem.current.SetSelectedGameObject(UIFirstSelected);
+        Debug.Log($"ConfigureUIForLogin changed");
     }
 
     private void ConfigureUIForLogout()

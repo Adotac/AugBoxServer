@@ -26,12 +26,13 @@ public class LoginMenu : MonoBehaviour
     [Header("Login type")]
     public Dropdown loginTypeDropdown;
 
-    [Header("Host Port")]
+    [Header("Host Port")] //Host adress or port
     public RectTransform idContainer;
     public Text idText;
     public UIConsoleInputField idInputField;
 
-    [Header("TokenID")]
+    [Header("TokenID")] //Username
+    public RectTransform tokenContainer;
     public Text tokenText;
     public UIConsoleInputField tokenInputField;
 
@@ -64,23 +65,12 @@ public class LoginMenu : MonoBehaviour
     public static string IdGlobalCache = string.Empty;
     public static string TokenGlobalCache = string.Empty;
 
-    private void Awake()
-    {
 
-
-        idInputField.InputField.onEndEdit.AddListener(CacheIdInputField);
-        tokenInputField.InputField.onEndEdit.AddListener(CacheTokenField);
-#if UNITY_EDITOR
-        loginType = LoginCredentialType.AccountPortal; // Default in editor
-#else
-        loginType = LoginCredentialType.AccountPortal; // Default on other platforms
-#endif
+    private void Awake() {
         useConnectLogin = false;
-
 #if UNITY_EDITOR || (UNITY_STANDALONE_OSX && EOS_PREVIEW_PLATFORM) || UNITY_STANDALONE_WIN || (UNITY_STANDALONE_LINUX && EOS_PREVIEW_PLATFORM)
-        idInputField.InputField.text = "localhost:7777"; //default on pc
+            idInputField.InputField.text = "localhost:7777"; //default on pc
 #endif
-
     }
 
     private void CacheIdInputField(string value)
@@ -93,8 +83,10 @@ public class LoginMenu : MonoBehaviour
         TokenGlobalCache = value;
     }
 
-    public void OnDropdownChange(int value)
+    public void OnDropdownChange(Dropdown down)
     {
+        int value = down.value;
+
         useConnectLogin = false;
         switch (value)
         {
@@ -118,262 +110,18 @@ public class LoginMenu : MonoBehaviour
                 break;
         }
 
-        Debug.Log($"Dropdown changed: {value}");
         ConfigureUIForLogin();
-        
     }
 
-    public void Start()
-    {
-        _OriginalloginButtonText = loginButtonText.text;
-        InitConnectDropdown();
-        ConfigureUIForLogin();
-
-        system = EventSystem.current;
-    }
-
-    private void EnterPressedToLogin()
-    {
-        if (loginButton.IsActive())
-        {
-            OnLoginButtonClick();
-        }
-    }
-
-    public void Update()
-    {
-        // Debug.Log($"Host input state: {idInputField.isActiveAndEnabled}");
-
-        // Prevent Deselection
-        if (system.currentSelectedGameObject != null && system.currentSelectedGameObject != selectedGameObject)
-        {
-            selectedGameObject = system.currentSelectedGameObject;
-        }
-        else if (selectedGameObject != null && system.currentSelectedGameObject == null)
-        {
-            system.SetSelectedGameObject(selectedGameObject);
-        }
-
-        // Controller: Detect if nothing is selected and controller input detected, and set default
-        bool nothingSelected = EventSystem.current != null && EventSystem.current.currentSelectedGameObject == null;
-        bool inactiveButtonSelected = EventSystem.current != null && EventSystem.current.currentSelectedGameObject != null && !EventSystem.current.currentSelectedGameObject.activeInHierarchy;
-
-        if ((nothingSelected || inactiveButtonSelected)
-            && (Input.GetAxis("Horizontal") != 0.0f || Input.GetAxis("Vertical") != 0.0f))
-        {
-            if (UIFirstSelected.activeSelf == true)
-            {
-                EventSystem.current.SetSelectedGameObject(UIFirstSelected);
-            }
-            else if (UIFindSelectable && UIFindSelectable.activeSelf == true)
-            {
-                EventSystem.current.SetSelectedGameObject(UIFindSelectable);
-            }
-
-            Debug.Log("Nothing currently selected, default to UIFirstSelected: EventSystem.current.currentSelectedGameObject = " + EventSystem.current.currentSelectedGameObject);
-        }
-
-        // Tab between input fields
-        if (Input.GetKeyDown(KeyCode.Tab)
-            && system.currentSelectedGameObject != null)
-        {
-            Selectable next = system.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
-
-            InputField inputField = system.currentSelectedGameObject.GetComponent<InputField>();
-
-            if (next != null)
-            {
-                InputField inputfield = next.GetComponent<InputField>();
-                if (inputfield != null)
-                {
-                    inputfield.OnPointerClick(new PointerEventData(system));
-                }
-
-                system.SetSelectedGameObject(next.gameObject);
-            }
-            else
-            {
-                next = FindTopUISelectable();
-                system.SetSelectedGameObject(next.gameObject);
-            }
-        }
-    }
-
-    private Selectable FindTopUISelectable()
-    {
-        Selectable currentTop = Selectable.allSelectablesArray[0];
-        double currentTopYaxis = currentTop.transform.position.y;
-
-        foreach (Selectable s in Selectable.allSelectablesArray)
-        {
-            if (s.transform.position.y > currentTopYaxis &&
-                s.navigation.mode != Navigation.Mode.None)
-            {
-                currentTop = s;
-                currentTopYaxis = s.transform.position.y;
-            }
-        }
-
-        return currentTop;
-    }
-
-    private void ConfigureUIForDevAuthLogin()
-    {
-        loginTypeDropdown.value = loginTypeDropdown.options.FindIndex(option => option.text == "Dev Auth");
-
-        if (!string.IsNullOrEmpty(IdGlobalCache))
-        {
-            idInputField.InputField.text = IdGlobalCache;
-        }
-
-        if (!string.IsNullOrEmpty(TokenGlobalCache))
-        {
-            tokenInputField.InputField.text = TokenGlobalCache;
-        }
-
-        idContainer.gameObject.SetActive(true);
-        connectTypeContainer.gameObject.SetActive(false);
-
-        idInputField.gameObject.SetActive(true);
-        tokenInputField.gameObject.SetActive(true);
-        Debug.Log($"Host input state after select: {idInputField.isActiveAndEnabled}");
-
-        idText.gameObject.SetActive(true);
-        tokenText.gameObject.SetActive(true);
-
-        loginTypeDropdown.navigation = new Navigation()
-        {
-            mode = Navigation.Mode.Explicit,
-            //selectOnUp = SceneSwitcherDropDown,
-            selectOnDown = idInputField.InputFieldButton
-        };
-
-        loginButton.navigation = new Navigation()
-        {
-            mode = Navigation.Mode.Explicit,
-            selectOnUp = tokenInputField.InputFieldButton,
-            selectOnDown = logoutButton,
-            selectOnLeft = logoutButton
-        };
-    }
-
-    private void ConfigureUIForAccountPortalLogin()
-    {
-        loginTypeDropdown.value = loginTypeDropdown.options.FindIndex(option => option.text == "Account Portal");
-
-        idContainer.gameObject.SetActive(true);
-        connectTypeContainer.gameObject.SetActive(false);
-        idInputField.gameObject.SetActive(false);
-        tokenInputField.gameObject.SetActive(false);
-        idText.gameObject.SetActive(false);
-        tokenText.gameObject.SetActive(false);
-
-        loginTypeDropdown.navigation = new Navigation()
-        {
-            mode = Navigation.Mode.Explicit,
-            //selectOnUp = SceneSwitcherDropDown,
-            selectOnDown = loginButton
-        };
-
-        loginButton.navigation = new Navigation()
-        {
-            mode = Navigation.Mode.Explicit,
-            selectOnUp = loginTypeDropdown,
-            selectOnDown = logoutButton,
-            selectOnLeft = logoutButton
-        };
-
-        // AC/TODO: Reduce duplicated UI code for the different login types
-        //SceneSwitcherDropDown.gameObject.SetActive(true);
-        DemoTitle.gameObject.SetActive(true);
-        loginTypeDropdown.gameObject.SetActive(true);
-
-        loginButtonText.text = _OriginalloginButtonText;
-        if (PreventLogIn != null)
-            StopCoroutine(PreventLogIn);
+    private void Start() {
         loginButton.enabled = true;
         loginButton.gameObject.SetActive(true);
-        logoutButton.gameObject.SetActive(false);
+        
+        _OriginalloginButtonText = loginButtonText.text;
+        InitConnectDropdown();
 
-        EventSystem.current.SetSelectedGameObject(UIFirstSelected);
-    }
-
-    private void ConfigureUIForPersistentLogin()
-    {
-        loginTypeDropdown.value = loginTypeDropdown.options.FindIndex(option => option.text == "PersistentAuth");
-
-        idContainer.gameObject.SetActive(true);
-        connectTypeContainer.gameObject.SetActive(false);
-        idInputField.gameObject.SetActive(false);
-        tokenInputField.gameObject.SetActive(false);
-        idText.gameObject.SetActive(false);
-        tokenText.gameObject.SetActive(false);
-
-        loginTypeDropdown.navigation = new Navigation()
-        {
-            mode = Navigation.Mode.Explicit,
-            //selectOnUp = SceneSwitcherDropDown,
-            selectOnDown = loginButton
-        };
-
-        loginButton.navigation = new Navigation()
-        {
-            mode = Navigation.Mode.Explicit,
-            selectOnUp = loginTypeDropdown,
-            selectOnDown = logoutButton,
-            selectOnLeft = logoutButton
-        };
-    }
-
-    //-------------------------------------------------------------------------
-    private void ConfigureUIForExternalAuth()
-    {
-        loginTypeDropdown.value = loginTypeDropdown.options.FindIndex(option => option.text == "ExternalAuth");
-
-        idContainer.gameObject.SetActive(true);
-        connectTypeContainer.gameObject.SetActive(false);
-        idInputField.gameObject.SetActive(false);
-        tokenInputField.gameObject.SetActive(false);
-        idText.gameObject.SetActive(false);
-        tokenText.gameObject.SetActive(false);
-
-        loginTypeDropdown.navigation = new Navigation()
-        {
-            mode = Navigation.Mode.Explicit,
-            //selectOnUp = SceneSwitcherDropDown,
-            selectOnDown = loginButton
-        };
-
-        loginButton.navigation = new Navigation()
-        {
-            mode = Navigation.Mode.Explicit,
-            selectOnUp = loginTypeDropdown,
-            selectOnDown = logoutButton,
-            selectOnLeft = logoutButton
-        };
-    }
-
-    private void ConfigureUIForConnectLogin()
-    {
-        idContainer.gameObject.SetActive(false);
-        tokenInputField.gameObject.SetActive(false);
-        tokenText.gameObject.SetActive(false);
-        connectTypeContainer.gameObject.SetActive(true);
-
-        loginTypeDropdown.navigation = new Navigation()
-        {
-            mode = Navigation.Mode.Explicit,
-            //selectOnUp = SceneSwitcherDropDown,
-            selectOnDown = connectTypeDropdown
-        };
-
-        connectTypeDropdown.navigation = new Navigation()
-        {
-            mode = Navigation.Mode.Explicit,
-            selectOnUp = loginTypeDropdown,
-            selectOnDown = logoutButton,
-            selectOnLeft = logoutButton
-        };
+        OnDropdownChange(loginTypeDropdown);
+        loginTypeDropdown.onValueChanged.AddListener(delegate {OnDropdownChange(loginTypeDropdown);} );
     }
 
     private void InitConnectDropdown()
@@ -381,17 +129,26 @@ public class LoginMenu : MonoBehaviour
         List<Dropdown.OptionData> connectOptions = new List<Dropdown.OptionData>();
 
         List<ExternalCredentialType> credentialTypes = new List<ExternalCredentialType>
-            {
-                ExternalCredentialType.DeviceidAccessToken,
-                //ExternalCredentialType.GogSessionTicket,
-                //ExternalCredentialType.AppleIdToken,
-                //ExternalCredentialType.GoogleIdToken,
-                //ExternalCredentialType.OculusUseridNonce,
-                //ExternalCredentialType.ItchioJwt,
-                //ExternalCredentialType.ItchioKey,
-                //ExternalCredentialType.AmazonAccessToken
-            };
+        {
+            ExternalCredentialType.DeviceidAccessToken,
+            //ExternalCredentialType.GogSessionTicket,
+            //ExternalCredentialType.AppleIdToken,
+            //ExternalCredentialType.GoogleIdToken,
+            //ExternalCredentialType.OculusUseridNonce,
+            //ExternalCredentialType.ItchioJwt,
+            //ExternalCredentialType.ItchioKey,
+            //ExternalCredentialType.AmazonAccessToken
+        };
 
+#if UNITY_STANDALONE
+        credentialTypes.Add(ExternalCredentialType.SteamSessionTicket);
+        credentialTypes.Add(ExternalCredentialType.SteamAppTicket);
+        
+#endif
+
+#if UNITY_STANDALONE || UNITY_ANDROID || UNITY_IOS
+        credentialTypes.Add(ExternalCredentialType.DiscordAccessToken);
+#endif
 
         foreach (var type in credentialTypes)
         {
@@ -403,10 +160,10 @@ public class LoginMenu : MonoBehaviour
 
     private void ConfigureUIForLogin()
     {
-        if (OnLogout != null)
-        {
-            OnLogout.Invoke();
-        }
+        // if (OnLogout != null)
+        // {
+        //     OnLogout.Invoke();
+        // }
 
         DemoTitle.gameObject.SetActive(true);
         loginTypeDropdown.gameObject.SetActive(true);
@@ -414,9 +171,6 @@ public class LoginMenu : MonoBehaviour
         loginButtonText.text = _OriginalloginButtonText;
         if (PreventLogIn != null)
             StopCoroutine(PreventLogIn);
-        loginButton.enabled = true;
-        loginButton.gameObject.SetActive(true);
-        logoutButton.gameObject.SetActive(false);
 
         if (useConnectLogin)
         {
@@ -445,12 +199,9 @@ public class LoginMenu : MonoBehaviour
         // Controller
         //EventSystem.current.SetSelectedGameObject(null);
         EventSystem.current.SetSelectedGameObject(UIFirstSelected);
-        Debug.Log($"ConfigureUIForLogin changed");
     }
-
     private void ConfigureUIForLogout()
     {
-        //SceneSwitcherDropDown.gameObject.SetActive(false);
         DemoTitle.gameObject.SetActive(false);
         loginTypeDropdown.gameObject.SetActive(false);
 
@@ -487,6 +238,78 @@ public class LoginMenu : MonoBehaviour
 
         });
     }
+    private void ConfigureUIForDevAuthLogin()
+    {
+        // loginTypeDropdown.value = loginTypeDropdown.options.FindIndex(option => option.text == "Dev Auth");
+
+        if (!string.IsNullOrEmpty(IdGlobalCache))
+        {
+            idInputField.InputField.text = IdGlobalCache;
+        }
+
+        if (!string.IsNullOrEmpty(TokenGlobalCache))
+        {
+            tokenInputField.InputField.text = TokenGlobalCache;
+        }
+
+        DemoTitle.gameObject.SetActive(true);
+        loginTypeDropdown.gameObject.SetActive(true);
+
+        idContainer.gameObject.SetActive(true);
+
+        connectTypeContainer.gameObject.SetActive(false);
+        
+        tokenContainer.gameObject.SetActive(true);
+
+        EventSystem.current.SetSelectedGameObject(UIFirstSelected);
+
+    }
+
+    private void ConfigureUIForAccountPortalLogin()
+    {
+        DemoTitle.gameObject.SetActive(true);
+        loginTypeDropdown.gameObject.SetActive(true);
+
+        idContainer.gameObject.SetActive(true);
+
+        connectTypeContainer.gameObject.SetActive(false);
+        
+        tokenContainer.gameObject.SetActive(false);
+
+        loginButtonText.text = _OriginalloginButtonText;
+        if (PreventLogIn != null)
+            StopCoroutine(PreventLogIn);
+
+        
+
+    }
+
+    private void ConfigureUIForPersistentLogin()
+    {
+        connectTypeContainer.gameObject.SetActive(false);
+
+        idContainer.gameObject.SetActive(false);
+
+        tokenContainer.gameObject.SetActive(false);
+    }
+
+    private void ConfigureUIForExternalAuth()
+    {
+        connectTypeContainer.gameObject.SetActive(false);
+        idContainer.gameObject.SetActive(false);
+
+        tokenContainer.gameObject.SetActive(false);
+    }
+
+    private void ConfigureUIForConnectLogin()
+    {
+        connectTypeContainer.gameObject.SetActive(true);
+        idContainer.gameObject.SetActive(false);
+
+        tokenContainer.gameObject.SetActive(false);
+        
+
+    }
 
     // For now, the only supported login type that requires a 'username' is the dev auth one
     bool SelectedLoginTypeRequiresUsername()
@@ -499,7 +322,6 @@ public class LoginMenu : MonoBehaviour
     {
         return loginType == LoginCredentialType.Developer;
     }
-
     private IEnumerator TurnButtonOnAfter15Sec()
     {
         for (int i = 15; i >= 0; i--)
@@ -510,10 +332,29 @@ public class LoginMenu : MonoBehaviour
         loginButton.enabled = true;
         loginButtonText.text = _OriginalloginButtonText;
     }
-
-  
-
-    // Username and password aren't always the username and password
+    private void StartLoginWithSteam()
+    {
+        var steamManager = SteamScript.SteamManager.Instance;
+        string steamId = steamManager?.GetSteamID();
+        string steamToken = steamManager?.GetSessionTicket();
+        if(steamId == null)
+        {
+            Debug.LogError("ExternalAuth failed: Steam ID not valid");
+        }
+        else if (steamToken == null)
+        {
+            Debug.LogError("ExternalAuth failed: Steam session ticket not valid");
+        }
+        else
+        {
+            EOSManager.Instance.StartLoginWithLoginTypeAndToken(
+                    LoginCredentialType.ExternalAuth,
+                    ExternalCredentialType.SteamSessionTicket,
+                    steamId,
+                    steamToken,
+                    StartLoginWithLoginTypeAndTokenCallback);
+        }
+    }
     public void OnLoginButtonClick()
     {
         string usernameAsString = idInputField.InputField.text.Trim();
@@ -532,11 +373,9 @@ public class LoginMenu : MonoBehaviour
         }
 
         loginButton.enabled = false;
-        if (PreventLogIn != null)
+        if(PreventLogIn!=null)
             StopCoroutine(PreventLogIn);
         PreventLogIn = StartCoroutine(TurnButtonOnAfter15Sec());
-        //usernameInputField.enabled = false;
-        //passwordInputField.enabled = false;
         print("Attempting to login...");
 
         // Disabled at the moment to work around a crash that happens
@@ -546,11 +385,11 @@ public class LoginMenu : MonoBehaviour
 
         if (useConnectLogin)
         {
-            string typeName = connectTypeDropdown.options[connectTypeDropdown.value].text;
-            if (Enum.TryParse(typeName, out ExternalCredentialType externalType))
-            {
-                AcquireTokenForConnectLogin(externalType);
-            }
+           Debug.Log("Function not supported!!");
+        }
+        else if (loginType == LoginCredentialType.ExternalAuth)
+        {
+            StartLoginWithSteam();
         }
         else if (loginType == LoginCredentialType.PersistentAuth)
         {
@@ -578,84 +417,6 @@ public class LoginMenu : MonoBehaviour
                                                                     passwordAsString,
                                                                     StartLoginWithLoginTypeAndTokenCallback);
         }
-    }
-
-    //-------------------------------------------------------------------------
-
-    private void AcquireTokenForConnectLogin(ExternalCredentialType externalType)
-    {
-        switch (externalType)
-        {
-
-            case ExternalCredentialType.DeviceidAccessToken:
-                ConnectDeviceId();
-                break;
-
-            default:
-                Debug.LogError($"Connect Login for {externalType} not implemented");
-                loginButton.interactable = true;
-                break;
-        }
-    }
-
-    private void ConnectDeviceId()
-    {
-        var connectInterface = EOSManager.Instance.GetEOSConnectInterface();
-        var options = new Epic.OnlineServices.Connect.CreateDeviceIdOptions()
-        {
-            DeviceModel = SystemInfo.deviceModel
-        };
-
-        connectInterface.CreateDeviceId(ref options, null, CreateDeviceCallback);
-    }
-
-    private void CreateDeviceCallback(ref Epic.OnlineServices.Connect.CreateDeviceIdCallbackInfo callbackInfo)
-    {
-        if (callbackInfo.ResultCode == Result.Success || callbackInfo.ResultCode == Result.DuplicateNotAllowed)
-        {
-#if UNITY_STANDALONE_WIN
-            //TODO: find device appropriate display name for other platforms
-            string displayName = "Device User";
-#endif
-            StartConnectLoginWithToken(ExternalCredentialType.DeviceidAccessToken, null, displayName);
-        }
-        else
-        {
-            Debug.LogError("Connect Login failed: Failed to create Device Id");
-            ConfigureUIForLogin();
-        }
-    }
-
-    private void StartConnectLoginWithToken(ExternalCredentialType externalType, string token, string displayName = null)
-    {
-        EOSManager.Instance.StartConnectLoginWithOptions(externalType, token, displayName, (Epic.OnlineServices.Connect.LoginCallbackInfo connectLoginCallbackInfo) =>
-        {
-            if (connectLoginCallbackInfo.ResultCode == Result.Success)
-            {
-                print("Connect Login Successful. [" + connectLoginCallbackInfo.ResultCode + "]");
-                ConfigureUIForLogout();
-            }
-            else if (connectLoginCallbackInfo.ResultCode == Result.InvalidUser)
-            {
-                // ask user if they want to connect; sample assumes they do
-                EOSManager.Instance.CreateConnectUserWithContinuanceToken(connectLoginCallbackInfo.ContinuanceToken, (Epic.OnlineServices.Connect.CreateUserCallbackInfo createUserCallbackInfo) =>
-                {
-                    print("Creating new connect user");
-                    if (createUserCallbackInfo.ResultCode == Result.Success)
-                    {
-                        ConfigureUIForLogout();
-                    }
-                    else
-                    {
-                        ConfigureUIForLogin();
-                    }
-                });
-            }
-            else
-            {
-                ConfigureUIForLogin();
-            }
-        });
     }
 
     //-------------------------------------------------------------------------
@@ -691,7 +452,8 @@ public class LoginMenu : MonoBehaviour
         });
     }
 
-    //-------------------------------------------------------------------------
+    //-------------------------------------------------------------------------//
+
     public void StartLoginWithLoginTypeAndTokenCallback(LoginCallbackInfo loginCallbackInfo)
     {
         if (loginCallbackInfo.ResultCode == Epic.OnlineServices.Result.AuthMFARequired)
@@ -744,6 +506,4 @@ public class LoginMenu : MonoBehaviour
         UnityEditor.EditorApplication.ExitPlaymode();
 #endif
     }
-
-
 }

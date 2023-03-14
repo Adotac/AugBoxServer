@@ -1152,7 +1152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34e4a322dca349547989b14021da4e23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Transport: {fileID: 1130396802}
+  Transport: {fileID: 1130396804}
   _intermediateLayer: {fileID: 0}
   _latencySimulator:
     _enabled: 0
@@ -1174,13 +1174,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _maximumClients: 4095
   socketName: FishyEOS
-  remoteServerProductUserId: 
+  remoteServerProductUserId: 4b39d100804f40cd9acda903cc5993be
   autoAuthenticate: 1
   authConnectData:
-    loginCredentialType: 3
-    externalCredentialType: 10
-    id: 
-    token: 
+    loginCredentialType: 4
+    externalCredentialType: 16
+    id: 127.0.0.1:7878
+    token: adotester
     displayName: FishyEOS
     automaticallyCreateDeviceId: 1
     automaticallyCreateConnectAccount: 1

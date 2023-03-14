@@ -1179,11 +1179,11 @@ MonoBehaviour:
   authConnectData:
     loginCredentialType: 4
     externalCredentialType: 16
-    id: 127.0.0.1:7878
+    id: localhost:7878
     token: adotester
     displayName: FishyEOS
-    automaticallyCreateDeviceId: 1
-    automaticallyCreateConnectAccount: 1
+    automaticallyCreateDeviceId: 0
+    automaticallyCreateConnectAccount: 0
     authScopeFlags: 0
     timeout: 30
 --- !u!1 &1237683761

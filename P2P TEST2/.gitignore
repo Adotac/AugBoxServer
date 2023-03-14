@@ -7,6 +7,8 @@
 *.tgz
 *.tar
 
+
+
 # Created by https://www.toptal.com/developers/gitignore/api/unity,visualstudio,monodevelop,unrealengine,csharp
 # Edit at https://www.toptal.com/developers/gitignore?templates=unity,visualstudio,monodevelop,unrealengine,csharp
 
@@ -562,6 +564,11 @@ Build/Android/res/*/*
 # Ignore plugins binaries on deep subfolders
 Plugins/**/Binaries/*
 Plugins/**/Intermediate/*
+
+# Ignore meta files in Unity
+!/Assets/Prefabs/*.meta
+!/Assets/Scripts/*.meta
+!/Assets/Scenes/*.meta
 
 ### VisualStudio ###
 

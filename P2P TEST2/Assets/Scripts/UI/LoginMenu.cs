@@ -28,13 +28,11 @@ public class LoginMenu : MonoBehaviour
 
     [Header("Host Port")] //Host adress or port
     public RectTransform idContainer;
-    public Text idText;
-    public UIConsoleInputField idInputField;
+    private UIConsoleInputField idInputField;
 
     [Header("TokenID")] //Username
     public RectTransform tokenContainer;
-    public Text tokenText;
-    public UIConsoleInputField tokenInputField;
+    private UIConsoleInputField tokenInputField;
 
     [Header("External Type")]
     public RectTransform connectTypeContainer;
@@ -68,9 +66,6 @@ public class LoginMenu : MonoBehaviour
 
     private void Awake() {
         useConnectLogin = false;
-#if UNITY_EDITOR || (UNITY_STANDALONE_OSX && EOS_PREVIEW_PLATFORM) || UNITY_STANDALONE_WIN || (UNITY_STANDALONE_LINUX && EOS_PREVIEW_PLATFORM)
-            idInputField.InputField.text = "localhost:7777"; //default on pc
-#endif
     }
 
     private void CacheIdInputField(string value)
@@ -116,7 +111,14 @@ public class LoginMenu : MonoBehaviour
     private void Start() {
         loginButton.enabled = true;
         loginButton.gameObject.SetActive(true);
-        
+
+        idInputField = idContainer.GetComponentInChildren<UIConsoleInputField>();
+        tokenInputField = tokenContainer.GetComponentInChildren<UIConsoleInputField>();
+
+#if UNITY_EDITOR || (UNITY_STANDALONE_OSX && EOS_PREVIEW_PLATFORM) || UNITY_STANDALONE_WIN || (UNITY_STANDALONE_LINUX && EOS_PREVIEW_PLATFORM)
+        idInputField.InputField.text = "localhost:7777"; //default on pc
+#endif
+
         _OriginalloginButtonText = loginButtonText.text;
         InitConnectDropdown();
 
@@ -208,10 +210,8 @@ public class LoginMenu : MonoBehaviour
         loginButton.gameObject.SetActive(false);
         logoutButton.gameObject.SetActive(true);
 
-        idText.gameObject.SetActive(false);
-        tokenText.gameObject.SetActive(false);
-        idInputField.gameObject.SetActive(false);
-        tokenInputField.gameObject.SetActive(false);
+        idContainer.gameObject.SetActive(false);
+        tokenContainer.gameObject.SetActive(false);
         connectTypeContainer.gameObject.SetActive(false);
 
         if (OnLogin != null)

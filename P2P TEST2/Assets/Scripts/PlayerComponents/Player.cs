@@ -40,7 +40,7 @@ namespace MultiP2P
             
             // GameManager.instance.players.Add(this);
             var fishy = InstanceFinder.NetworkManager.GetComponent<FishyEOS>();
-            UserId = fishy.GetConnectionAddress(Owner.ClientId);
+            UserId = fishy.GetRemoteConnectionAddress(Owner.ClientId);
         }
 
         public override void OnStartClient()
@@ -131,14 +131,15 @@ namespace MultiP2P
             { //check if this is the owner of the object in the client or host side
                 Debug.Log($"IsOwner: {IsOwner}");
                 return;
-            } 
-
-            if (Input.GetKeyDown(KeyCode.R)) {
-                ServerSetIsReady(!isReady);
-                Debug.Log($"Ready: {isReady}"); 
             }
 
-            if (Input.GetKeyDown(KeyCode.T)) {
+            //if (Input.GetKeyDown(KeyCode.R)) {
+            //    ServerSetIsReady(!isReady);
+            //    Debug.Log($"Ready: {isReady}"); 
+            //}
+
+            if (Input.GetKeyDown(KeyCode.T))
+            {
                 ServerSpawnPawn();
                 Debug.Log("Should Spawn");
             }

@@ -439,5 +439,17 @@ namespace FishNet.Transporting.FishyEOSPlugin
             var client = _clients.FirstOrDefault(x => x.Id == connectionId);
             return client.LocalUserId.ToString();
         }
+
+        /// <summary>
+        /// Gets the EOS Local Product User Id of the remote connection.
+        /// </summary>
+        internal string GetRemoteConnectionAddress(int connectionId)
+        {
+            if (connectionId == FishyEOS.CLIENT_HOST_ID)
+                return _localUserId.ToString();
+
+            var client = _clients.FirstOrDefault(x => x.Id == connectionId);
+            return client.RemoteUserId.ToString();
+        }
     }
 }

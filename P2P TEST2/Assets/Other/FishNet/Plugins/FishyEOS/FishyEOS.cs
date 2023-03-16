@@ -154,6 +154,18 @@ namespace FishNet.Transporting.FishyEOSPlugin
         /// </summary>
         public override event Action<RemoteConnectionStateArgs> OnRemoteConnectionState;
 
+        // Added for so user can be kicked from EOS lobby as well as server
+
+        /// <summary>
+        /// Gets the EOS Connect Peer Id of a connection Id. 
+        /// </summary>
+        /// <param name="connectionId"></param>
+        /// <returns></returns>
+        public string GetRemoteConnectionAddress(int connectionId)
+        {
+            return _server.GetRemoteConnectionAddress(connectionId);
+        }
+
         /// <summary>
         /// Gets the current local ConnectionState.
         /// </summary>

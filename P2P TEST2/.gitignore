@@ -7,6 +7,8 @@
 *.tgz
 *.tar
 
+/Assets/JsonDotNet/*
+/Assets/JsonDotNet/Assemblies/AOT.meta
 
 
 # Created by https://www.toptal.com/developers/gitignore/api/unity,visualstudio,monodevelop,unrealengine,csharp

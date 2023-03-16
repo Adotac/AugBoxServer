@@ -2,11 +2,14 @@ using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using UnityEngine;
 
-public sealed class Pawn : NetworkBehaviour
+namespace MultiP2P
 {
-    [SyncVar]
-    public Player controllingPlayer;
+    public sealed class Pawn : NetworkBehaviour
+    {
+        [SyncVar]
+        public Player controllingPlayer;
 
-    [SyncVar]
-    public float health;
+        [SyncVar]
+        public float health;
+    }
 }

@@ -3881,11 +3881,6 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 1
---- !u!1 &761546624 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6805157399151008946, guid: 075698d29adf0cd4ea16ab8bd49528d0, type: 3}
-  m_PrefabInstance: {fileID: 877955677}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &765000808
 GameObject:
   m_ObjectHideFlags: 0
@@ -5417,11 +5412,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HorizontalFit: 0
   m_VerticalFit: 1
---- !u!1 &1078225543 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6805157399151008946, guid: 87f1228530be1c04a80d7f75d2bdbdd9, type: 3}
-  m_PrefabInstance: {fileID: 1340885956}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1107275137
 GameObject:
   m_ObjectHideFlags: 0
@@ -7785,7 +7775,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 639e1e73b66348d40bb56179b32cf83d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerItemPrefab: {fileID: 1078225543}
+  playerItemPrefab: {fileID: 6805157399151008946, guid: 87f1228530be1c04a80d7f75d2bdbdd9, type: 3}
   container: {fileID: 395323090}
 --- !u!1 &1716451448
 GameObject:
@@ -8926,7 +8916,7 @@ MonoBehaviour:
   _runInBackground: 1
   _dontDestroyOnLoad: 1
   _objectPool: {fileID: 0}
-  _persistence: 0
+  _persistence: 1
   _logging: {fileID: 0}
   _spawnablePrefabs: {fileID: 11400000, guid: 166f029140c131e4dbc92711a1da23b0, type: 2}
 --- !u!4 &1920040980
@@ -9524,7 +9514,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41452c937238852468f7b15b53336eca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lobbyItemPrefab: {fileID: 761546624}
+  lobbyItemPrefab: {fileID: 6805157399151008946, guid: 075698d29adf0cd4ea16ab8bd49528d0, type: 3}
   container: {fileID: 1040236251}
 --- !u!114 &2013368456
 MonoBehaviour:

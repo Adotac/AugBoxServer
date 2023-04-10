@@ -11,7 +11,7 @@ using System.Linq;
 using FishNet.Transporting.FishyEOSPlugin;
 using FishNet;
 
-namespace MultiP2P
+namespace MultiP2P 
 {
     public class UIPanelMain : UIPanel<UIPanelMain>, IUIPanel
     {

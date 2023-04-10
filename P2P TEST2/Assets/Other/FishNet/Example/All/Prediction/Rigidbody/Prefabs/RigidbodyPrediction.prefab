@@ -176,7 +176,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _defaultDespawnType: 0
   NetworkObserver: {fileID: 0}
-  <PrefabId>k__BackingField: 19
+  <PrefabId>k__BackingField: 2
   <SpawnableCollectionId>k__BackingField: 0
   _scenePathHash: 0
   <SceneId>k__BackingField: 0
@@ -226,7 +226,7 @@ MonoBehaviour:
   _spectatorSmoothPosition: 1
   _spectatorSmoothRotation: 1
   _spectatorInterpolation: 4
-  _overflowMultiplier: 0.05
+  _overflowMultiplier: 0.1
   _maintainedVelocity: 0
   _resendType: 0
   _resendInterval: 30

@@ -222,7 +222,7 @@ MonoBehaviour:
   _addedNetworkObject: {fileID: 611616139817875448}
   _networkObjectCache: {fileID: 611616139817875448}
   _camera: {fileID: 5090726669533971462}
-  _moveRate: 4
+  _moveRate: 8
   _clientAuth: 1
 --- !u!54 &3514369712614123748
 Rigidbody:
@@ -279,7 +279,7 @@ MonoBehaviour:
   _initializeOrder: 0
   _defaultDespawnType: 0
   NetworkObserver: {fileID: 0}
-  <PrefabId>k__BackingField: 0
+  <PrefabId>k__BackingField: 6
   <SpawnableCollectionId>k__BackingField: 0
   _scenePathHash: 0
   <SceneId>k__BackingField: 0

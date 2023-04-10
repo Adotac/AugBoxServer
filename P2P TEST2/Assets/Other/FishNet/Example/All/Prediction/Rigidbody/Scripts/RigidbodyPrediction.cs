@@ -129,6 +129,11 @@ namespace FishNet.Example.Prediction.Rigidbodies
         {
             if (base.IsOwner)
             {
+                if (Input.GetKeyDown(KeyCode.RightAlt))
+                {
+                    _rigidbody.velocity = Vector3.zero;
+                    _rigidbody.angularVelocity = Vector3.zero;
+                }
                 if (Input.GetKeyDown(KeyCode.Space) && Time.time > _nextJumpTime)
                 {
                     _nextJumpTime = Time.time + 1f;
@@ -138,10 +143,10 @@ namespace FishNet.Example.Prediction.Rigidbodies
                 {
                     _spawnBullet = true;
                 }
-                else if (Input.GetKeyDown(KeyCode.LeftAlt))
-                {
-                    _despawnBullet = true;
-                }
+                //else if (Input.GetKeyDown(KeyCode.LeftAlt))
+                //{
+                //    _despawnBullet = true;
+                //}
             }
         }
 
@@ -230,7 +235,7 @@ namespace FishNet.Example.Prediction.Rigidbodies
                 PredictedBullet bt = nob.GetComponent<PredictedBullet>();
                 bt.SetStartingForce(transform.forward * 20f);
                 //Spawn client side, which will send the predicted spawn to server.
-                base.Spawn(nob);
+                base.Spawn(nob, base.Owner);
             }
         }
 

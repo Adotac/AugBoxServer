@@ -1,15 +1,11 @@
-﻿/* If nested then the nested NB should be sent every tick.
- * This is because if that tick happens to drop then the
- * sent data is now wrong given the parent information is wrong.
- * Once EC is added in we won't have to send every time since
- * it will eventually correct itself. */
-
+﻿#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#define DEVELOPMENT
+#endif
 using FishNet.Connection;
 using FishNet.Documenting;
 using FishNet.Managing.Logging;
 using FishNet.Managing.Server;
 using FishNet.Object;
-using FishNet.Object.Synchronizing;
 using FishNet.Serializing;
 using FishNet.Transporting;
 using FishNet.Utility.Extension;
@@ -25,6 +21,14 @@ namespace FishNet.Component.Transforming
     public sealed class NetworkTransform : NetworkBehaviour
     {
         #region Types.
+        [System.Serializable]
+        public enum ComponentConfigurationType
+        {
+            Disabled = 0,
+            CharacterController = 1,
+            Rigidbody = 2,
+            Rigidbody2D = 3,
+        }
         private struct ReceivedData
         {
             public List<bool> HasData;
@@ -258,6 +262,12 @@ namespace FishNet.Component.Transforming
 
         #region Serialized.
         /// <summary>
+        /// Attached movement component to automatically configure.
+        /// </summary>
+        [Tooltip("Attached movement component to automatically configure.")]
+        [SerializeField]
+        private ComponentConfigurationType _componentConfiguration = ComponentConfigurationType.Disabled;
+        /// <summary>
         /// True to synchronize when this transform changes parent.
         /// </summary>
         [Tooltip("True to synchronize when this transform changes parent.")]
@@ -323,7 +333,6 @@ namespace FishNet.Component.Transforming
         /// Sets SendToOwner. Only the server may call this method.
         /// </summary>
         /// <param name="value">New value.</param>
-        [Server]
         public void SetSendToOwner(bool value)
         {
             _sendToOwner = value;
@@ -427,7 +436,7 @@ namespace FishNet.Component.Transforming
         /// <summary>
         /// Values changed over time that server has sent to clients since last reliable has been sent.
         /// </summary>
-        private ChangedDelta _serverChangedSinceReliable = ChangedDelta.Unset;
+        private List<ChangedDelta> _serverChangedSinceReliable = new List<ChangedDelta>();
         /// <summary>
         /// Values changed over time that client has sent to server since last reliable has been sent.
         /// </summary>
@@ -511,14 +520,16 @@ namespace FishNet.Component.Transforming
         {
             base.OnStartServer();
 
+            ConfigureComponents();
             _receivedClientData.HasData = new List<bool>();
 
             //Initialize for LODs.
-            for (int i = 0; i < base.ObserverManager.LevelOfDetailDistances.Count; i++)
+            for (int i = 0; i < base.ObserverManager.GetLevelOfDetailDistances().Count; i++)
             {
                 _changedWriters.Add(WriterPool.GetWriter());
                 _lastSentTransformDatas.Add(new TransformData());
                 _receivedClientData.HasData.Add(false);
+                _serverChangedSinceReliable.Add(ChangedDelta.Unset);
             }
 
             SetDefaultGoalData();
@@ -552,11 +563,12 @@ namespace FishNet.Component.Transforming
         public override void OnStartClient()
         {
             base.OnStartClient();
+            ConfigureComponents();
 
             //Initialize for LOD if client only.
             if (base.IsClientOnly)
             {
-                for (int i = 0; i < base.ObserverManager.LevelOfDetailDistances.Count; i++)
+                for (int i = 0; i < base.ObserverManager.GetLevelOfDetailDistances().Count; i++)
                 {
                     _changedWriters.Add(WriterPool.GetWriter());
                     _lastSentTransformDatas.Add(new TransformData());
@@ -604,6 +616,12 @@ namespace FishNet.Component.Transforming
             base.OnStopServer();
             //Always unsubscribe; if the server stopped so did client.
             ChangeTickSubscription(false);
+            for (int i = 0; i < base.ObserverManager.GetLevelOfDetailDistances().Count; i++)
+            {
+                _lastSentTransformDatas[i].Reset();
+                _serverChangedSinceReliable[i] = ChangedDelta.Unset;
+                _receivedClientData.SetHasData(false, (byte)i);
+            }
         }
 
         public override void OnStopClient()
@@ -619,6 +637,65 @@ namespace FishNet.Component.Transforming
             MoveToTarget();
         }
 
+        /// <summary>
+        /// Configures components automatically.
+        /// </summary>
+        private void ConfigureComponents()
+        {
+            //Disabled.
+            if (_componentConfiguration == ComponentConfigurationType.Disabled)
+            {
+                return;
+            }
+            //RB.
+            else if (_componentConfiguration == ComponentConfigurationType.Rigidbody)
+            {
+
+                if (TryGetComponent<Rigidbody>(out Rigidbody c))
+                {
+                    bool isKinematic = (!base.IsOwner || base.IsServerOnly);
+                    c.isKinematic = isKinematic;
+                    c.interpolation = RigidbodyInterpolation.None;
+                }
+            }
+            //RB2D
+            else if (_componentConfiguration == ComponentConfigurationType.Rigidbody2D)
+            {
+                //Only client authoritative needs to be configured.
+                if (!_clientAuthoritative)
+                    return;
+                if (TryGetComponent<Rigidbody2D>(out Rigidbody2D c))
+                {
+                    bool isKinematic = (!base.IsOwner || base.IsServerOnly);
+                    c.isKinematic = isKinematic;
+                    c.simulated = !isKinematic;
+                    c.interpolation = RigidbodyInterpolation2D.None;
+                }
+            }
+            //CC
+            else if (_componentConfiguration == ComponentConfigurationType.CharacterController)
+            {
+                if (TryGetComponent<CharacterController>(out CharacterController c))
+                {
+                    //Client auth.
+                    if (_clientAuthoritative)
+                    {
+                        c.enabled = base.IsOwner;
+                    }
+                    //Server auth.
+                    else
+                    {
+                        //Not CSP.
+                        if (_sendToOwner)
+                            c.enabled = base.IsServer;
+                        //Most likely CSP.
+                        else
+                            c.enabled = (base.IsServer || base.IsOwner);
+
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Called when a tick occurs.
@@ -1176,7 +1253,7 @@ namespace FishNet.Component.Transforming
         private void SendToClients(byte lodIndex)
         {
             //True if clientAuthoritative and there is an owner.
-            bool clientAuthoritativeWithOwner = (_clientAuthoritative && base.Owner.IsValid);
+            bool clientAuthoritativeWithOwner = (_clientAuthoritative && base.Owner.IsValid && !base.Owner.IsLocalClient);
             //Channel to send rpc on.
             Channel channel = Channel.Unreliable;
             //If relaying from client.
@@ -1210,18 +1287,18 @@ namespace FishNet.Component.Transforming
                     if (changed == ChangedDelta.Unset)
                     {
                         //No changes since last reliable; transform is up to date.
-                        if (_serverChangedSinceReliable == ChangedDelta.Unset)
+                        if (_serverChangedSinceReliable[i] == ChangedDelta.Unset)
                             continue;
 
                         //Set changed to all changes over time and unset changes over time.
-                        changed = _serverChangedSinceReliable;
-                        _serverChangedSinceReliable = ChangedDelta.Unset;
+                        changed = _serverChangedSinceReliable[lodIndex];
+                        _serverChangedSinceReliable[i] = ChangedDelta.Unset;
                         channel = Channel.Reliable;
                     }
                     //There is change.
                     else
                     {
-                        _serverChangedSinceReliable |= changed;
+                        _serverChangedSinceReliable[i] |= changed;
                     }
 
                     dataChanged = true;
@@ -1239,13 +1316,21 @@ namespace FishNet.Component.Transforming
                 {
                     foreach (NetworkConnection nc in base.Observers)
                     {
+                        //If to not send to owner.
+                        if (!_sendToOwner && nc == base.Owner)
+                            continue;
+
                         byte lod;
                         if (!nc.LevelOfDetails.TryGetValue(base.NetworkObject, out lod))
                             lod = 0;
                         //Not high enough index to send to conn.
                         if (lod > lodIndex)
                             continue;
-
+                        //No need for server to send to local client (clientHost).
+                        //Still send if development for stat tracking.
+#if !DEVELOPMENT
+                        if (!nc.IsLocalClient)
+#endif
                         TargetUpdateTransform(nc, _changedWriters[lodIndex].GetArraySegment(), channel);
                     }
                 }
@@ -1258,6 +1343,14 @@ namespace FishNet.Component.Transforming
         /// </summary>
         private void SendToServer(TransformData lastSentTransformData)
         {
+            /* ClientHost does not need to send to the server.
+             * Ideally this would still occur and the data be ignored
+             * for statistics tracking but to keep the code more simple
+             * we won't be doing that. Server out however still is tracked,
+             * which is generally considered more important data. */
+            if (base.IsServer)
+                return;
+
             //Not client auth or not owner.
             if (!_clientAuthoritative || !base.IsOwner)
                 return;
@@ -1362,14 +1455,13 @@ namespace FishNet.Component.Transforming
             * if it exist always send regardless
             * of the previously sent transform
             * data. */
-            NetworkBehaviour parentBehaviour = _parentBehaviour;
-            return GetChanged(ref transformData.Position, ref transformData.Rotation, ref transformData.Scale, parentBehaviour);
+            return GetChanged(ref transformData.Position, ref transformData.Rotation, ref transformData.Scale, transformData.ParentBehaviour);
         }
         /// <summary>
         /// Gets transform values that have changed against specified proprties.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ChangedDelta GetChanged(ref Vector3 lastPosition, ref Quaternion lastRotation, ref Vector3 lastScale, NetworkBehaviour parentBehaviour)
+        private ChangedDelta GetChanged(ref Vector3 lastPosition, ref Quaternion lastRotation, ref Vector3 lastScale, NetworkBehaviour lastParentBehaviour)
         {
             ChangedDelta changed = ChangedDelta.Unset;
             Transform t = transform;
@@ -1397,7 +1489,9 @@ namespace FishNet.Component.Transforming
             if (scale.z != lastScale.z)
                 changed |= ChangedDelta.ScaleZ;
 
-            if (parentBehaviour != null)
+            //Only include parent if there is additional data to send.
+            bool sendParent = (_parentBehaviour == null && lastParentBehaviour != null) || (changed != ChangedDelta.Unset && _parentBehaviour != null);
+            if (sendParent)
                 changed |= ChangedDelta.Nested;
 
             //If added scale or nested then also add extended.
@@ -1412,7 +1506,7 @@ namespace FishNet.Component.Transforming
         /// <summary>
         /// Snaps transform properties using snapping settings.
         /// </summary>
-        private void SnapProperties(TransformData transformData)
+        private void SnapProperties(TransformData transformData, bool force = false)
         {
             //Already snapped.
             if (transformData.Snapped)
@@ -1425,9 +1519,9 @@ namespace FishNet.Component.Transforming
             if (_synchronizePosition)
             {
                 Vector3 position;
-                position.x = (_positionSnapping.X) ? transformData.Position.x : t.localPosition.x;
-                position.y = (_positionSnapping.Y) ? transformData.Position.y : t.localPosition.y;
-                position.z = (_positionSnapping.Z) ? transformData.Position.z : t.localPosition.z;
+                position.x = (force || _positionSnapping.X) ? transformData.Position.x : t.localPosition.x;
+                position.y = (force || _positionSnapping.Y) ? transformData.Position.y : t.localPosition.y;
+                position.z = (force || _positionSnapping.Z) ? transformData.Position.z : t.localPosition.z;
                 t.localPosition = position;
             }
 
@@ -1436,9 +1530,9 @@ namespace FishNet.Component.Transforming
             {
                 Vector3 eulers;
                 Vector3 goalEulers = transformData.Rotation.eulerAngles;
-                eulers.x = (_rotationSnapping.X) ? goalEulers.x : t.localEulerAngles.x;
-                eulers.y = (_rotationSnapping.Y) ? goalEulers.y : t.localEulerAngles.y;
-                eulers.z = (_rotationSnapping.Z) ? goalEulers.z : t.localEulerAngles.z;
+                eulers.x = (force || _rotationSnapping.X) ? goalEulers.x : t.localEulerAngles.x;
+                eulers.y = (force || _rotationSnapping.Y) ? goalEulers.y : t.localEulerAngles.y;
+                eulers.z = (force || _rotationSnapping.Z) ? goalEulers.z : t.localEulerAngles.z;
                 t.localEulerAngles = eulers;
             }
 
@@ -1446,9 +1540,9 @@ namespace FishNet.Component.Transforming
             if (_synchronizeScale)
             {
                 Vector3 scale;
-                scale.x = (_scaleSnapping.X) ? transformData.Scale.x : t.localScale.x;
-                scale.y = (_scaleSnapping.Y) ? transformData.Scale.y : t.localScale.y;
-                scale.z = (_scaleSnapping.Z) ? transformData.Scale.z : t.localScale.z;
+                scale.x = (force || _scaleSnapping.X) ? transformData.Scale.x : t.localScale.x;
+                scale.y = (force || _scaleSnapping.Y) ? transformData.Scale.y : t.localScale.y;
+                scale.z = (force || _scaleSnapping.Z) ? transformData.Scale.z : t.localScale.z;
                 t.localScale = scale;
             }
         }
@@ -1619,6 +1713,12 @@ namespace FishNet.Component.Transforming
         [TargetRpc(ValidateTarget = false)]
         private void TargetUpdateTransform(NetworkConnection conn, ArraySegment<byte> data, Channel channel)
         {
+#if DEVELOPMENT
+            //If receiver is client host then do nothing, clientHost need not process.
+            if (base.IsServer && conn.IsLocalClient)
+                return;
+#endif
+
             byte lod;
             /* Get cached LOD for connection receiving this. It will of course
              * always be the local client for conn. */
@@ -1804,7 +1904,7 @@ namespace FishNet.Component.Transforming
                 //Snap to the next data to fix any smoothing timings.
                 SetCurrentGoalData(_goalDataQueue.Dequeue());
                 SetInstantRates(_currentGoalData.Rates);
-                SnapProperties(_currentGoalData.Transforms);
+                SnapProperties(_currentGoalData.Transforms, true);
             }
         }
 
@@ -1854,7 +1954,14 @@ namespace FishNet.Component.Transforming
         internal void ConfigureForCSP()
         {
             _clientAuthoritative = false;
-            _sendToOwner = false;
+            if (base.IsServer)
+                _sendToOwner = false;
+
+            /* If other or CC then needs to be configured.
+             * When CC it will be configured properly, if there
+             * is no CC then no action will be taken. */
+            _componentConfiguration = ComponentConfigurationType.CharacterController;
+            ConfigureComponents();
         }
 
         /// <summary>
